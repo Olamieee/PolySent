@@ -1,1 +1,20 @@
-yoruba/yoruba_sentences.txt
+models/yoruba/yoruba_sentences.txt
+models/yoruba/dev.tsv
+models/yoruba/train.tsv
+models/yoruba/test.tsv
+models/yoruba/yor.csv
+models/yoruba/yoruba_synthetic_sentiment_15k_mixed_lengths.csv
+models/yoruba/afrisenti_results
+models/yoruba/yoruba_dataset.csv
+models/yoruba/yoruba_word2vec.model
+models/yoruba/yoruba_sentiment_noisy_5k.csv
+models/kinyarwanda/model.safetensors
+# models/pidgin/pidgin_tweets.csv
+app.py
+templates/
+models/swahili/
+models/amharic
+swahili/
+amharic/
+index2.html
+fast.py
