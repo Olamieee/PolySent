@@ -7,6 +7,7 @@ models/yoruba/yoruba_synthetic_sentiment_15k_mixed_lengths.csv
 models/yoruba/afrisenti_results
 models/yoruba/yoruba_dataset.csv
 models/yoruba/yoruba_word2vec.model
+models/yoruba/yoruba.keras
 models/yoruba/yoruba_sentiment_noisy_5k.csv
 models/kinyarwanda/model.safetensors
 # models/pidgin/pidgin_tweets.csv
@@ -18,3 +19,9 @@ swahili/
 amharic/
 index2.html
 fast.py
+.env
+models/yoruba/saved_model_yoruba
+models/pidgin/saved_model_pidgin
+models/eng/english.keras
+models/pidgin/pidgin.keras
+models/eng/english.keras

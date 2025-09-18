@@ -1,0 +1,38 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+    background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+    color: #333;
+}
+h1 {
+    color: #4CAF50;
+}
+input, textarea, select, button {
+    padding: 10px;
+    margin: 5px;
+    font-size: 16px;
+    width: 100%;
+    max-width: 400px;
+}
+textarea {
+    height: 100px;
+}
+button {
+    background: #4CAF50;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+button:hover {
+    background: #45a049;
+}
+a {
+    color: #4CAF50;
+    text-decoration: none;
+}
+a:hover {
+    text-decoration: underline;
+}
+p {
+    font-size: 18px;
+}
