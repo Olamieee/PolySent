@@ -25,3 +25,6 @@ models/pidgin/saved_model_pidgin
 models/eng/english.keras
 models/pidgin/pidgin.keras
 models/eng/english.keras
+models/eng/English.keras
+models/eng/saved_model_english
+__pycache__
