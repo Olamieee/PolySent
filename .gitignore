@@ -29,3 +29,4 @@ models/eng/english.keras
 models/eng/English_model.keras
 models/eng/saved_model_english
 __pycache__
+subscriptions.db

@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, Depends
+from fastapi import FastAPI, HTTPException, Depends, Request
 from pydantic import BaseModel
 from fastapi.security import APIKeyHeader
 import re
@@ -46,22 +46,15 @@ conn.commit()
 api_key_header = APIKeyHeader(name="X-API-Key")
 
 async def verify_subscription(api_key: str = Depends(api_key_header)):
-    """
-    How it comes into play:
-    - Checks if the API key is valid and has remaining requests.
-    - Decrements requests_left after validation to enforce plan limits.
-    - Raises 403 if invalid/expired, preventing unauthorized access.
-    - For free trials: Pre-insert a trial key with 1000 requests and 14-day expiry.
-    - Example: Client pays via Paystack -> Generate API key -> Insert into DB -> Client uses key in headers.
-    """
     cursor = conn.cursor()
     cursor.execute("SELECT plan, requests_left, expiry_date FROM subscriptions WHERE api_key = ?", (api_key,))
     result = cursor.fetchone()
-    if not result or result[1] <= 0 or result[2] < datetime.now().isoformat():
+    if not result or (result[1] != -1 and result[1] <= 0) or result[2] < datetime.now().isoformat():
         raise HTTPException(status_code=403, detail="Invalid or inactive subscription")
-    # Decrement request count
-    cursor.execute("UPDATE subscriptions SET requests_left = requests_left - 1 WHERE api_key = ?", (api_key,))
-    conn.commit()
+    # Decrement request count if not unlimited
+    if result[1] != -1:
+        cursor.execute("UPDATE subscriptions SET requests_left = requests_left - 1 WHERE api_key = ?", (api_key,))
+        conn.commit()
     return api_key
 
 # Load spaCy for English and Pidgin preprocessing
@@ -176,17 +169,17 @@ async def moderate_text(input: TextInput, api_key: str = Depends(verify_subscrip
             return json.loads(cached_result)
 
         # Route to model based on selected language
-        if input.language == "yo":
+        if input.language.lower() == "yoruba":
             cleaned_text = preprocess_text_yoruba(input.text)
             result = {"sentiment": predict_keras(yoruba_session, yoruba_model, yoruba_tokenizer, cleaned_text)}
-        elif input.language == "en":
+        elif input.language.lower() == "english":
             cleaned_text = preprocess_text_eng(input.text)
             result = {"sentiment": predict_keras(english_session, english_model, english_tokenizer, cleaned_text)}
-        elif input.language in ["pi", "pcm"]:
+        elif input.language.lower() == "pidgin":
             cleaned_text = preprocess_text_pidgin(input.text)
             result = {"sentiment": predict_keras(pidgin_session, pidgin_model, pidgin_tokenizer, cleaned_text)}
         else:
-            raise HTTPException(status_code=400, detail="Unsupported language: choose 'en', 'pi', or 'yo'")
+            raise HTTPException(status_code=400, detail="Unsupported language: choose 'English', 'Pidgin', or 'Yoruba'")
 
         # Cache result for 1 hour (scalability)
         redis_client.setex(cache_key, 3600, json.dumps(result))
@@ -209,22 +202,47 @@ async def create_trial():
                    (api_key, "trial", 1000, expiry))
     conn.commit()
     return {"api_key": api_key, "expiry": expiry}
-from flutterwave import Flutterwave  # Import Flutterwave SDK
-import os
 
-fw = Flutterwave(public_key=os.getenv("FLW_PUBLIC_KEY"), secret_key=os.getenv("FLW_SECRET_KEY"), encrypt=os.getenv("FLW_ENCRYPT", False))
+# Subscription input model
+class SubscribeInput(BaseModel):
+    plan: str
+    email: str
 
-async def verify_subscription(api_key: str = Depends(api_key_header)):
-    # Check Flutterwave for subscription status (e.g., via transaction ID linked to API key)
-    try:
-        # Example: Verify recurring charge
-        charge = fw.charge.get(api_key)  # Or use webhook for real-time
-        if charge.status != "successful" or charge.amount < 100:  # e.g., $100 min for Basic
-            raise HTTPException(status_code=403, detail="Invalid or inactive subscription")
-        # Decrement requests_left in SQLite (as before)
+# Endpoint to initiate subscription
+@app.post("/subscribe")
+async def subscribe(input: SubscribeInput):
+    if input.plan == "basic":
+        amount = 1000  # $10 in kobo (Nigerian currency, adjust as needed)
+    elif input.plan == "pro":
+        amount = 5000  # $50 in kobo
+    else:
+        raise HTTPException(status_code=400, detail="Invalid plan")
+    
+    response = paystack.transaction.initialize(
+        email=input.email,
+        amount=amount,
+        callback_url=os.getenv("CALLBACK_URL", "http://localhost:5000/callback"),
+        metadata={"plan": input.plan}
+    )
+    if response.get('status'):
+        return {"payment_url": response['data']['authorization_url']}
+    raise HTTPException(status_code=500, detail="Payment initiation failed")
+
+# Webhook for Paystack
+@app.post("/webhook")
+async def webhook(request: Request):
+    data = await request.json()
+    if data['event'] == "charge.success":
+        transaction = data['data']
+        plan = transaction['metadata']['plan']
+        email = transaction['customer']['email']
+        api_key = "sub_" + str(datetime.now().timestamp())
+        requests_left = 10000 if plan == "basic" else -1  # -1 for unlimited
+        expiry = (datetime.now() + timedelta(days=30)).isoformat()
         cursor = conn.cursor()
-        cursor.execute("UPDATE subscriptions SET requests_left = requests_left - 1 WHERE api_key = ?", (api_key,))
+        cursor.execute("INSERT INTO subscriptions (api_key, plan, requests_left, expiry_date) VALUES (?, ?, ?, ?)",
+                       (api_key, plan, requests_left, expiry))
         conn.commit()
-        return api_key
-    except Exception as e:
-        raise HTTPException(status_code=403, detail="Subscription verification failed")
+        # In production, send email with api_key to user
+        logger.info(f"Subscription created for {email}: API Key={api_key}")
+    return {"status": "success"}
