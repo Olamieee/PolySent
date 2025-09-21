@@ -10,3 +10,4 @@ onnxruntime
 tf2onnx
 flask
 requests
+gunicorn
