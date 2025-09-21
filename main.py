@@ -18,7 +18,7 @@ from paystackapi import Paystack
 import onnxruntime as ort
 
 # Initialize FastAPI
-app = FastAPI(title="Content Moderation API")
+app = FastAPI(title="VibeSentry")
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -212,9 +212,9 @@ class SubscribeInput(BaseModel):
 @app.post("/subscribe")
 async def subscribe(input: SubscribeInput):
     if input.plan == "basic":
-        amount = 1000  # $10 in kobo (Nigerian currency, adjust as needed)
+        amount = 15000  # $10 in naira (Nigerian currency, adjust as needed)
     elif input.plan == "pro":
-        amount = 5000  # $50 in kobo
+        amount = 75000  # $50 in naira
     else:
         raise HTTPException(status_code=400, detail="Invalid plan")
     
