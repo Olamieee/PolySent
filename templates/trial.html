@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trial Activated - VibeSentry</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="../static/css/style.css" rel="stylesheet">
+    <script>
+        function toggleTheme() {
+            document.body.classList.toggle('dark');
+            localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light');
+        }
+        window.onload = () => {
+            if (localStorage.getItem('theme') === 'dark') {
+                document.body.classList.add('dark');
+            }
+        };
+    </script>
+</head>
+<body>
+    <nav>
+    <div class="container">
+        <a href="index.html" class="logo">VibeSentry</a>
+        <div class="nav-links">
+              <a href="pricing.html">Pricing</a>
+            <a href="contact.html">Contact</a>
+            <a href="login.html">Login</a>
+            <div class="theme-toggle" onclick="toggleTheme()"></div>
+        </div>
+    </div>
+</nav>
+    <div class="container">
+        <h1>Your Free Trial is Activated!</h1>
+        <div class="card">
+            <p><strong>API Key:</strong> {{ trial.api_key }}</p>
+            <p><strong>Expiry Date:</strong> {{ trial.expiry }}</p>
+            <p>Use this key to access the dashboard and start moderating content.</p>
+            <a href="login.html" class="cta-button">Login Now</a>
+        </div>
+    </div>
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 VibeSentry. All rights reserved.</p>
+        </div>
+    </footer>
+</body>
+</html>

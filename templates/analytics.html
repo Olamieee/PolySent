@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytics - VibeSentry</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="../static/css/style.css" rel="stylesheet">
+    <script>
+        function toggleTheme() {
+            document.body.classList.toggle('dark');
+            localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light');
+        }
+        window.onload = () => {
+            if (localStorage.getItem('theme') === 'dark') {
+                document.body.classList.add('dark');
+            }
+        };
+    </script>
+</head>
+<body>
+    <nav>
+    <div class="container">
+        <a href="index.html" class="logo">VibeSentry</a>
+        <div class="nav-links">
+            <a href="pricing.html">Pricing</a>
+            <a href="contact.html">Contact</a>
+            <a href="login.html">Login</a>
+            <div class="theme-toggle" onclick="toggleTheme()"></div>
+        </div>
+    </div>
+</nav>
+    <div class="container">
+        <h1>Moderation Analytics</h1>
+        <div class="analytics-grid">
+            <div class="analytics-card">
+                <p>{{ analytics.negative }}%</p>
+                <span>Negative Comments</span>
+            </div>
+            <div class="analytics-card">
+                <p>{{ analytics.neutral }}%</p>
+                <span>Neutral Comments</span>
+            </div>
+            <div class="analytics-card">
+                <p>{{ analytics.positive }}%</p>
+                <span>Positive Comments</span>
+            </div>
+        </div>
+        <div class="links">
+            <a href="dashboard.html">Back to Dashboard</a>
+            <a href="logout.html">Logout</a>
+        </div>
+    </div>
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 VibeSentry. All rights reserved.</p>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VibeSentry - AI-Powered Content Moderation</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="../static/css/style.css" rel="stylesheet">
+    <script>
+        function toggleTheme() {
+            document.body.classList.toggle('dark');
+            localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light');
+        }
+        window.onload = () => {
+            if (localStorage.getItem('theme') === 'dark') {
+                document.body.classList.add('dark');
+            }
+        };
+    </script>
+</head>
+<body>
+ <nav>
+    <div class="container">
+        <a href="index.html" class="logo">VibeSentry</a>
+        <div class="nav-links">
+              <a href="pricing.html">Pricing</a>
+            <a href="contact.html">Contact</a>
+            <a href="login.html">Login</a>
+            <div class="theme-toggle" onclick="toggleTheme()"></div>
+        </div>
+    </div>
+</nav>
+
+    <section class="hero">
+        <div class="container">
+            <h1>Revolutionize Your Content Moderation</h1>
+            <p>Harness the power of AI to analyze sentiments in English, Pidgin, Yoruba, and beyond. Secure, scalable, and seamless integration for your platform's safety.</p>
+            <a href="trial.html" class="cta-button">Start Free Trial</a>
+        </div>
+    </section>
+
+    <section class="features">
+        <div class="container">
+            <h2>Powerful Features</h2>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <h3>Multi-Language Analysis</h3>
+                    <p>Support for diverse languages with state-of-the-art ML models, including custom preprocessing for Pidgin and Yoruba.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>Real-Time Dashboards</h3>
+                    <p>Monitor sentiment trends, analytics, and moderation results in an intuitive dashboard.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>Secure API & Billing</h3>
+                    <p>API key authentication, integrated with Paystack/Flutterwave for seamless subscriptions and usage tracking.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>Scalable Infrastructure</h3>
+                    <p>Powered by FastAPI, Redis caching, and ONNX/Keras models for high performance and low latency.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="how-it-works">
+        <div class="container">
+            <h2>How It Works</h2>
+            <div class="grid">
+                <div class="feature-card">
+                    <h3>1. Sign Up & Get API Key</h3>
+                    <p>Start with a free trial or subscribe to a plan to receive your secure API key.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>2. Integrate & Moderate</h3>
+                    <p>Send text via API, select language, and get instant sentiment analysis.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>3. Analyze & Optimize</h3>
+                    <p>Use dashboards for insights, scale with unlimited plans, and ensure compliance.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="testimonials">
+        <div class="container">
+            <h2>What Our Users Say</h2>
+            <div class="grid">
+                <div class="feature-card">
+                    <p>"VibeSentry transformed our community moderation—fast and accurate!"</p>
+                    <span>- Tech Startup CEO</span>
+                </div>
+                <div class="feature-card">
+                    <p>"Seamless integration and reliable results. Highly recommended."</p>
+                    <span>- Social Media Manager</span>
+                </div>
+                <div class="feature-card">
+                    <p>"The multi-language support is a game-changer for our global audience."</p>
+                    <span>- Content Platform Owner</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 VibeSentry. All rights reserved.</p>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - VibeSentry</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="../static/css/style.css" rel="stylesheet">
+    <script>
+        function toggleTheme() {
+            document.body.classList.toggle('dark');
+            localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light');
+        }
+        window.onload = () => {
+            if (localStorage.getItem('theme') === 'dark') {
+                document.body.classList.add('dark');
+            }
+        };
+    </script>
+</head>
+<body>
+    <nav>
+    <div class="container">
+        <a href="index.html" class="logo">VibeSentry</a>
+        <div class="nav-links">
+              <a href="pricing.html">Pricing</a>
+            <a href="contact.html">Contact</a>
+            <a href="login.html">Login</a>
+            <div class="theme-toggle" onclick="toggleTheme()"></div>
+        </div>
+    </div>
+</nav>
+    <div class="container flex items-center justify-center min-h-screen px-4">
+        <div class="card w-full max-w-lg">
+            <h1 class="text-center">Login to Dashboard</h1>
+            <form method="POST" action="/login">
+                <div>
+                    <label for="api_key">API Key:</label>
+                    <input type="text" id="api_key" name="api_key" class="input-field" placeholder="Enter your API key...">
+                </div>
+                <button type="submit" class="mt-6">Login</button>
+            </form>
+            {% if error %}
+                <p class="error text-center">{{ error }}</p>
+            {% endif %}
+            <p class="text-center mt-4">Don't have an API key? <a href="trial.html">Start a Free Trial</a></p>
+        </div>
+    </div>
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 VibeSentry. All rights reserved.</p>
+        </div>
+    </footer>
+</body>
+</html>
