@@ -21,22 +21,24 @@
 <body>
     <nav>
     <div class="container">
-        <a href="index.html" class="logo">VibeSentry</a>
+        <a href="/" class="logo">VibeSentry</a>
         <div class="nav-links">
-              <a href="pricing.html">Pricing</a>
-            <a href="contact.html">Contact</a>
-            <a href="login.html">Login</a>
+             <a href="{{ url_for('pricing') }}">Pricing</a>
+            <a href="{{ url_for('contact') }}">Contact</a>
+            <a href="{{ url_for('logout') }}">Logout</a>
+        </nav>
             <div class="theme-toggle" onclick="toggleTheme()"></div>
         </div>
     </div>
 </nav>
+
     <div class="container">
         <h1>Your Free Trial is Activated!</h1>
         <div class="card">
             <p><strong>API Key:</strong> {{ trial.api_key }}</p>
             <p><strong>Expiry Date:</strong> {{ trial.expiry }}</p>
             <p>Use this key to access the dashboard and start moderating content.</p>
-            <a href="login.html" class="cta-button">Login Now</a>
+            <a href="{{ url_for('login') }}" class="cta-button">Login Now</a>
         </div>
     </div>
     <footer>

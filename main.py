@@ -14,11 +14,14 @@ import os
 import logging
 import sqlite3
 from datetime import datetime, timedelta
-from paystackapi import Paystack
-import onnxruntime as ort
+import requests  # For exchange rate
+from rave_python import Rave, RaveExceptions
+import onnxruntime as ort  # Assuming this is imported elsewhere; add if needed
+from dotenv import load_dotenv
 
 # Initialize FastAPI
 app = FastAPI(title="VibeSentry")
+load_dotenv()
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -27,8 +30,10 @@ logger = logging.getLogger(__name__)
 # Initialize Redis for caching (scalability)
 redis_client = redis.Redis(host=os.getenv("REDIS_HOST", "localhost"), port=6379, db=0, decode_responses=True)
 
-# Initialize Paystack for billing
-paystack = Paystack(secret_key=os.getenv("PAYSTACK_SECRET_KEY"))
+# Initialize Flutterwave
+rave = Rave(os.getenv("FLW_PUBLIC_KEY"), 
+            os.getenv("FLW_SECRET_KEY"),
+            production=os.getenv("FLW_PRODUCTION", "False") == "True")
 
 # Initialize SQLite for subscriptions (billing)
 conn = sqlite3.connect("subscriptions.db", check_same_thread=False)
@@ -74,6 +79,17 @@ ONNX_PATHS = {
     "english": "./models/eng/english.onnx",
     "yoruba": "./models/yoruba/yoruba.onnx"
 }
+
+# Global variables for models (initialize here or in try block)
+pidgin_session = None
+english_session = None
+yoruba_session = None
+pidgin_model = None
+english_model = None
+yoruba_model = None
+pidgin_tokenizer = None
+english_tokenizer = None
+yoruba_tokenizer = None
 
 # Load models (Keras or ONNX)
 try:
@@ -157,6 +173,32 @@ def predict_keras(session, model, tokenizer, text: str) -> str:
         pred = model.predict(padded, verbose=0)
     return label_map[np.argmax(pred, axis=1)[0]]
 
+# Function to get USD to NGN rate (using free, no-signup API)
+def get_ngn_rate():
+    # Check Redis cache first (1-hour expiry)
+    cached_rate = redis_client.get("usd_ngn_rate")
+    if cached_rate:
+        return float(cached_rate)
+    
+    # Fetch from ExchangeRate.host (free, unlimited, no key)
+    url = "https://api.exchangerate.host/latest?base=USD&symbols=NGN"
+    try:
+        response = requests.get(url, timeout=5)
+        if response.status_code == 200:
+            data = response.json()
+            if data.get("success"):
+                rate = data["rates"].get("NGN", 1600)  # Fallback to hardcoded if missing
+                redis_client.setex("usd_ngn_rate", 3600, str(rate))  # Cache for 1 hour
+                logger.info(f"Fetched NGN rate: {rate}")
+                return float(rate)
+    except Exception as e:
+        logger.error(f"Exchange rate fetch failed: {str(e)}")
+    
+    # Ultimate fallback (update periodically based on current rates ~1530 as of 2025-09-22)
+    fallback_rate = 1600
+    redis_client.setex("usd_ngn_rate", 3600, str(fallback_rate))
+    return fallback_rate
+
 # Unified moderation endpoint with caching and authentication
 @app.post("/moderate")
 async def moderate_text(input: TextInput, api_key: str = Depends(verify_subscription)):
@@ -211,30 +253,45 @@ class SubscribeInput(BaseModel):
 # Endpoint to initiate subscription
 @app.post("/subscribe")
 async def subscribe(input: SubscribeInput):
-    if input.plan == "basic":
-        amount = 15000  # $10 in naira (Nigerian currency, adjust as needed)
-    elif input.plan == "pro":
-        amount = 75000  # $50 in naira
-    else:
+    usd_prices = {"basic": 10, "pro": 50}
+    if input.plan not in usd_prices:
         raise HTTPException(status_code=400, detail="Invalid plan")
     
-    response = paystack.transaction.initialize(
-        email=input.email,
-        amount=amount,
-        callback_url=os.getenv("CALLBACK_URL", "http://localhost:5000/callback"),
-        metadata={"plan": input.plan}
-    )
-    if response.get('status'):
-        return {"payment_url": response['data']['authorization_url']}
+    ngn_rate = get_ngn_rate()
+    amount = int(usd_prices[input.plan] * ngn_rate)  # Convert to NGN (int for Flutterwave)
+    
+    payload = {
+        "amount": amount,
+        "email": input.email,
+        "currency": "NGN",
+        "redirect_url": os.getenv("CALLBACK_URL", "http://localhost:5000/callback"),
+        "meta": {"plan": input.plan},
+        "txref": "vibesentry_" + str(datetime.now().timestamp())
+    }
+    
+    try:
+        res = rave.Account.charge(payload)  # Using account charge for simplicity; adjust for card if needed
+        if res.get("authUrl"):
+            return {"payment_url": res["authUrl"]}
+        elif res.get("validationRequired"):
+            # Handle further validation if needed
+            raise RaveExceptions.TransactionChargeError("Validation required")
+    except RaveExceptions.TransactionChargeError as e:
+        raise HTTPException(status_code=500, detail=str(e.err))
     raise HTTPException(status_code=500, detail="Payment initiation failed")
 
-# Webhook for Paystack
+# Webhook for Flutterwave
 @app.post("/webhook")
 async def webhook(request: Request):
+    secret_hash = os.getenv("FLW_WEBHOOK_HASH")
+    signature = request.headers.get("verif-hash")
+    if signature != secret_hash:
+        raise HTTPException(status_code=401, detail="Invalid webhook signature")
+
     data = await request.json()
-    if data['event'] == "charge.success":
+    if data['event'] == "charge.completed" and data['data']['status'] == "successful":
         transaction = data['data']
-        plan = transaction['metadata']['plan']
+        plan = transaction['meta']['plan']
         email = transaction['customer']['email']
         api_key = "sub_" + str(datetime.now().timestamp())
         requests_left = 10000 if plan == "basic" else -1  # -1 for unlimited

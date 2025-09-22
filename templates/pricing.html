@@ -19,17 +19,18 @@
     </script>
 </head>
 <body>
-   <nav>
+ <nav>
     <div class="container">
-        <a href="index.html" class="logo">VibeSentry</a>
+        <a href="/" class="logo">VibeSentry</a>
         <div class="nav-links">
-            <a href="pricing.html">Pricing</a>
-            <a href="contact.html">Contact</a>
-            <a href="login.html">Login</a>
+            <a href="{{ url_for('pricing') }}">Pricing</a>
+            <a href="{{ url_for('contact') }}">Contact</a>
+            <a href="{{ url_for('login') }}">Login</a>
             <div class="theme-toggle" onclick="toggleTheme()"></div>
         </div>
     </div>
 </nav>
+
     <div class="container">
         <h1>Pricing Plans</h1>
         <div class="pricing-grid">
@@ -41,7 +42,7 @@
                     <li>14-day expiry</li>
                     <li>Basic support</li>
                 </ul>
-                <a href="trial.html" class="cta-button">Start Trial</a>
+                <a href="{{ url_for('create_trial') }}" class="cta-button">Start Trial</a>
             </div>
             <div class="pricing-card">
                 <h3>Basic</h3>

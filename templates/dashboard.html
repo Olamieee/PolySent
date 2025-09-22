@@ -3,53 +3,55 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - VibeSentry</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link href="../static/css/style.css" rel="stylesheet">
-    <script>
-        function toggleTheme() {
-            document.body.classList.toggle('dark');
-            localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light');
-        }
-        window.onload = () => {
-            if (localStorage.getItem('theme') === 'dark') {
-                document.body.classList.add('dark');
-            }
-        };
-    </script>
+    <title>VibeSentry - Dashboard</title>
 </head>
 <body>
-    <nav>
+        <nav>
     <div class="container">
-        <a href="index.html" class="logo">VibeSentry</a>
+        <a href="/" class="logo">VibeSentry</a>
         <div class="nav-links">
-              <a href="pricing.html">Pricing</a>
-            <a href="contact.html">Contact</a>
-            <a href="login.html">Login</a>
+              <a href="{{ url_for('pricing') }}">Pricing</a>
+            <a href="{{ url_for('contact') }}">Contact</a>
+            <a href="{{ url_for('analytics') }}">Analytics</a>
+            <a href="{{ url_for('logout') }}">Logout</a>
+        </nav>
             <div class="theme-toggle" onclick="toggleTheme()"></div>
         </div>
     </div>
 </nav>
-    <div class="container flex items-center justify-center min-h-screen px-4">
-        <div class="card w-full max-w-lg">
-            <h1 class="text-center">Login to Dashboard</h1>
-            <form method="POST" action="/login">
-                <div>
-                    <label for="api_key">API Key:</label>
-                    <input type="text" id="api_key" name="api_key" class="input-field" placeholder="Enter your API key...">
-                </div>
-                <button type="submit" class="mt-6">Login</button>
-            </form>
-            {% if error %}
-                <p class="error text-center">{{ error }}</p>
+
+    <main>
+        <h2>Content Moderation Dashboard</h2>
+        <form method="POST" action="/dashboard">
+            <label for="text">Text to Analyze:</label>
+            <textarea name="text" id="text" required placeholder="Enter text to moderate"></textarea>
+            <label for="language">Language:</label>
+            <select name="language" id="language" required>
+                <option value="">Select Language</option>
+                <option value="english">English</option>
+                <option value="pidgin">Pidgin</option>
+                <option value="yoruba">Yoruba</option>
+            </select>
+            <button type="submit">Analyze</button>
+        </form>
+        {% if result %}
+            {% if result.error %}
+                <p style="color: red;">Error: {{ result.error }}</p>
+            {% else %}
+                <p>Sentiment: {{ result.sentiment }}</p>
             {% endif %}
-            <p class="text-center mt-4">Don't have an API key? <a href="trial.html">Start a Free Trial</a></p>
-        </div>
-    </div>
+        {% endif %}
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <p class="{{ category }}">{{ message }}</p>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </main>
+
     <footer>
-        <div class="container">
-            <p>&copy; 2025 VibeSentry. All rights reserved.</p>
-        </div>
+        <p>© 2025 VibeSentry. All rights reserved.</p>
     </footer>
 </body>
 </html>

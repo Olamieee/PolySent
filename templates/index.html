@@ -21,11 +21,11 @@
 <body>
  <nav>
     <div class="container">
-        <a href="index.html" class="logo">VibeSentry</a>
+        <a href="/" class="logo">VibeSentry</a>
         <div class="nav-links">
-              <a href="pricing.html">Pricing</a>
-            <a href="contact.html">Contact</a>
-            <a href="login.html">Login</a>
+            <a href="{{ url_for('pricing') }}">Pricing</a>
+            <a href="{{ url_for('contact') }}">Contact</a>
+            <a href="{{ url_for('logout') }}">Logout</a>
             <div class="theme-toggle" onclick="toggleTheme()"></div>
         </div>
     </div>

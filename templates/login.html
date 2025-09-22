@@ -21,15 +21,16 @@
 <body>
     <nav>
     <div class="container">
-        <a href= "index.html" class="logo">VibeSentry</a>
+        <a href="/" class="logo">VibeSentry</a>
         <div class="nav-links">
-             <a href="pricing.html">Pricing</a>
-            <a href="contact.html">Contact</a>
-            <a href="login.html">Login</a>
+            <a href="{{ url_for('pricing') }}">Pricing</a>
+            <a href="{{ url_for('contact') }}">Contact</a>
+            <a href="{{ url_for('login') }}">Login</a>
             <div class="theme-toggle" onclick="toggleTheme()"></div>
         </div>
     </div>
 </nav>
+
     <div class="container flex items-center justify-center min-h-screen px-4">
         <div class="card w-full max-w-lg">
             <h1 class="text-center">Login to Dashboard</h1>
@@ -43,7 +44,7 @@
             {% if error %}
                 <p class="error text-center">{{ error }}</p>
             {% endif %}
-            <p class="text-center mt-4">Don't have an API key? <a href="trial.html">Start a Free Trial</a></p>
+            <p class="text-center mt-4">Don't have an API key? <a href="{{ url_for('create_trial') }}">Start a Free Trial</a></p>
         </div>
     </div>
     <footer>
