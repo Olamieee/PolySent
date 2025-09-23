@@ -11,3 +11,4 @@ tf2onnx
 flask
 requests
 gunicorn
+rave-python
