@@ -1,10 +1,9 @@
-fastapi
+# fastapi
 uvicorn
 spacy
 seaborn
 scikit-learn
 tensorflow
-redis
 paystackapi
 onnxruntime
 tf2onnx

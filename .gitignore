@@ -19,7 +19,7 @@ models/amharic
 swahili/
 amharic/
 index2.html
-fast.py
+main/py
 .env
 models/yoruba/saved_model_yoruba
 models/pidgin/saved_model_pidgin
