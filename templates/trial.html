@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Trial Activated - VibeSentry</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="../static/css/style.css" rel="stylesheet">
     <script>
         function toggleTheme() {
@@ -18,29 +18,72 @@
         };
     </script>
 </head>
-<body>
+<body class="trial-page">
     <nav>
-    <div class="container">
-        <a href="/" class="logo">VibeSentry</a>
-        <div class="nav-links">
-             <a href="{{ url_for('pricing') }}">Pricing</a>
-            <a href="{{ url_for('contact') }}">Contact</a>
-            <a href="{{ url_for('logout') }}">Logout</a>
-        </nav>
-            <div class="theme-toggle" onclick="toggleTheme()"></div>
+        <div class="container">
+            <a href="/" class="logo">VibeSentry</a>
+            <div class="nav-links">
+                <a href="{{ url_for('pricing') }}">Pricing</a>
+                <a href="{{ url_for('contact') }}">Contact</a>
+                <a href="{{ url_for('login') }}">Login</a>
+                <a href="{{ url_for('signup') }}">Sign Up</a>
+                <div class="theme-toggle" onclick="toggleTheme()"></div>
+            </div>
         </div>
-    </div>
-</nav>
+    </nav>
 
-    <div class="container">
+    <div class="main-container">
         <h1>Your Free Trial is Activated!</h1>
+        <p>Your VibeSentry trial account has been created successfully. You can now start moderating content with AI-powered sentiment analysis.</p>
+        
         <div class="card">
-            <p><strong>API Key:</strong> {{ trial.api_key }}</p>
-            <p><strong>Expiry Date:</strong> {{ trial.expiry }}</p>
-            <p>Use this key to access the dashboard and start moderating content.</p>
-            <a href="{{ url_for('login') }}" class="cta-button">Login Now</a>
+            <div style="text-align: center; margin-bottom: 24px;">
+                <div style="font-size: 48px; color: var(--success); margin-bottom: 16px;">✅</div>
+                <h3 style="color: var(--text-primary); margin-bottom: 8px;">Trial Account Details</h3>
+            </div>
+            
+            <div style="background: var(--bg-tertiary); padding: 20px; border-radius: var(--border-radius); margin-bottom: 24px;">
+                <p style="margin: 8px 0;"><strong>API Key:</strong> 
+                    <code style="background: var(--card-bg); padding: 4px 8px; border-radius: 4px; font-family: monospace; word-break: break-all;">{{ trial.api_key }}</code>
+                </p>
+                {% if trial.email %}
+                    <p style="margin: 8px 0;"><strong>Email:</strong> {{ trial.email }}</p>
+                {% endif %}
+                <p style="margin: 8px 0;"><strong>Expiry Date:</strong> {{ trial.expiry }}</p>
+                <p style="margin: 8px 0;"><strong>Requests Included:</strong> 1,000</p>
+            </div>
+            
+            <div style="background: rgba(59, 130, 246, 0.1); padding: 16px; border-radius: var(--border-radius); margin-bottom: 24px; border-left: 4px solid var(--accent-primary);">
+                <p style="margin: 0; color: var(--text-secondary); font-size: 14px;">
+                    <strong>Important:</strong> Save your API key securely. You'll need both your email and API key to log in to your dashboard.
+                </p>
+            </div>
+            
+            <div style="display: flex; gap: 16px; flex-wrap: wrap;">
+                <a href="{{ url_for('login') }}" class="cta-button" style="flex: 1; min-width: 200px;">Login to Dashboard</a>
+                <a href="{{ url_for('pricing') }}" class="cta-button" style="background: var(--bg-tertiary); color: var(--text-primary); flex: 1; min-width: 200px;">Upgrade Plan</a>
+            </div>
+        </div>
+        
+        <div style="text-align: center; margin-top: 32px; color: var(--text-secondary);">
+            <h3 style="color: var(--text-primary); margin-bottom: 16px;">What's Next?</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-top: 20px;">
+                <div style="padding: 16px; background: var(--card-bg); border-radius: var(--border-radius); border: 1px solid var(--card-border);">
+                    <div style="font-size: 24px; margin-bottom: 8px;">🚀</div>
+                    <p style="margin: 0; font-size: 14px;">Start analyzing text in English, Pidgin, and Yoruba</p>
+                </div>
+                <div style="padding: 16px; background: var(--card-bg); border-radius: var(--border-radius); border: 1px solid var(--card-border);">
+                    <div style="font-size: 24px; margin-bottom: 8px;">📊</div>
+                    <p style="margin: 0; font-size: 14px;">View detailed analytics and insights</p>
+                </div>
+                <div style="padding: 16px; background: var(--card-bg); border-radius: var(--border-radius); border: 1px solid var(--card-border);">
+                    <div style="font-size: 24px; margin-bottom: 8px;">⚡</div>
+                    <p style="margin: 0; font-size: 14px;">Integrate with your applications via API</p>
+                </div>
+            </div>
         </div>
     </div>
+    
     <footer>
         <div class="container">
             <p>&copy; 2025 VibeSentry. All rights reserved.</p>

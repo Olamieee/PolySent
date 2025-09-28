@@ -3,55 +3,160 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VibeSentry - Dashboard</title>
+    <title>Dashboard - VibeSentry</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="/static/css/style.css" rel="stylesheet">
 </head>
-<body>
-        <nav>
-    <div class="container">
-        <a href="/" class="logo">VibeSentry</a>
-        <div class="nav-links">
-              <a href="{{ url_for('pricing') }}">Pricing</a>
-            <a href="{{ url_for('contact') }}">Contact</a>
-            <a href="{{ url_for('analytics') }}">Analytics</a>
-            <a href="{{ url_for('logout') }}">Logout</a>
-        </nav>
-            <div class="theme-toggle" onclick="toggleTheme()"></div>
+<body class="dashboard-page">
+    <nav>
+        <div class="container">
+            <a href="/" class="logo">VibeSentry</a>
+            <div class="nav-links">
+                {% if session.get('user_info') %}
+                    <span style="color: var(--text-secondary); font-size: 14px;">
+                        Welcome, {{ session.user_info.first_name }}!
+                    </span>
+                {% endif %}
+                <a href="{{ url_for('pricing') }}">Pricing</a>
+                <a href="{{ url_for('contact') }}">Contact</a>
+                <a href="{{ url_for('dashboard') }}">Dashboard</a>
+                <a href="{{ url_for('analytics') }}">Analytics</a>
+                <a href="{{ url_for('logout') }}">Logout</a>
+                <div class="theme-toggle" onclick="toggleTheme()"></div>
+            </div>
         </div>
-    </div>
-</nav>
+    </nav>
 
-    <main>
-        <h2>Content Moderation Dashboard</h2>
-        <form method="POST" action="/dashboard">
-            <label for="text">Text to Analyze:</label>
-            <textarea name="text" id="text" required placeholder="Enter text to moderate"></textarea>
-            <label for="language">Language:</label>
-            <select name="language" id="language" required>
-                <option value="">Select Language</option>
-                <option value="english">English</option>
-                <option value="pidgin">Pidgin</option>
-                <option value="yoruba">Yoruba</option>
-            </select>
-            <button type="submit">Analyze</button>
-        </form>
-        {% if result %}
-            {% if result.error %}
-                <p style="color: red;">Error: {{ result.error }}</p>
-            {% else %}
-                <p>Sentiment: {{ result.sentiment }}</p>
-            {% endif %}
-        {% endif %}
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <p class="{{ category }}">{{ message }}</p>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
+    <main class="dashboard-container">
+        <div class="container">
+            <div class="dashboard-header">
+                <h1>Content Moderation Dashboard</h1>
+                <p>Analyze text sentiment across multiple languages with AI-powered precision</p>
+                {% if session.get('user_info') %}
+                    <p style="color: var(--text-secondary); font-size: 16px;">
+                        Plan: <strong>{{ session.user_info.plan|title }}</strong>
+                    </p>
+                {% endif %}
+            </div>
+
+            <div class="dashboard-content">
+                <div class="analysis-card card">
+                    <h2>Text Analysis</h2>
+                    <form method="POST" action="/dashboard" class="analysis-form">
+                        <div class="form-group">
+                            <label for="text">Text to Analyze:</label>
+                            <textarea name="text" id="text" required placeholder="Enter text to moderate" class="input-field"></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="language">Language:</label>
+                            <select name="language" id="language" required class="input-field">
+                                <option value="">Select Language</option>
+                                <option value="english">English</option>
+                                <option value="pidgin">Pidgin</option>
+                                <option value="yoruba">Yoruba</option>
+                            </select>
+                        </div>
+                        
+                        <button type="submit" class="analyze-btn">
+                            <span class="btn-text">Analyze</span>
+                            <span class="btn-loader"></span>
+                        </button>
+                    </form>
+                </div>
+
+                {% if result %}
+                    <div class="result-card card fade-in-result" id="resultCard">
+                        <div class="result-header">
+                            <h3>Analysis Result</h3>
+                            <div class="result-badge">
+                                <span class="badge-dot"></span>
+                                Complete
+                            </div>
+                        </div>
+                        
+                        {% if result.error %}
+                            <div class="result-content error-result">
+                                <div class="result-icon error-icon">⚠️</div>
+                                <div class="result-text">
+                                    <p class="result-title">Analysis Error</p>
+                                    <p class="result-description">{{ result.error }}</p>
+                                </div>
+                            </div>
+                        {% else %}
+                            <div class="result-content success-result">
+                                <div class="result-icon success-icon">✨</div>
+                                <div class="result-text">
+                                    <p class="result-title">Sentiment Analysis</p>
+                                    <p class="result-description">
+                                        The analyzed text shows a <strong class="sentiment-value">{{ result.sentiment }}</strong> sentiment
+                                    </p>
+                                </div>
+                                <div class="sentiment-indicator {{ result.sentiment.lower() }}">
+                                    {{ result.sentiment }}
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endif %}
+
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        <div class="flash-messages">
+                            {% for category, message in messages %}
+                                <div class="flash-message {{ category }} fade-in-result">
+                                    <span class="flash-icon">
+                                        {% if category == 'error' %}⚠️{% else %}✅{% endif %}
+                                    </span>
+                                    {{ message }}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                {% endwith %}
+            </div>
+        </div>
     </main>
 
     <footer>
-        <p>© 2025 VibeSentry. All rights reserved.</p>
+        <div class="container">
+            <p>© 2025 VibeSentry. All rights reserved.</p>
+        </div>
     </footer>
+
+    <script>
+        // Theme toggle functionality
+        function toggleTheme() {
+            document.body.classList.toggle('dark');
+            localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light');
+        }
+
+        // Load saved theme
+        if (localStorage.getItem('theme') === 'dark') {
+            document.body.classList.add('dark');
+        }
+
+        // Form submission animation
+        document.querySelector('.analysis-form').addEventListener('submit', function(e) {
+            const button = this.querySelector('.analyze-btn');
+            const btnText = button.querySelector('.btn-text');
+            const btnLoader = button.querySelector('.btn-loader');
+            
+            button.classList.add('loading');
+            btnText.style.opacity = '0';
+            btnLoader.style.display = 'block';
+            button.disabled = true;
+        });
+
+        // Animate result card on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const resultCard = document.getElementById('resultCard');
+            if (resultCard) {
+                setTimeout(() => {
+                    resultCard.classList.add('show');
+                }, 300);
+            }
+        });
+    </script>
 </body>
 </html>

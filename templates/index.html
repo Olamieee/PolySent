@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VibeSentry - AI-Powered Content Moderation</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="../static/css/style.css" rel="stylesheet">
     <script>
         function toggleTheme() {
@@ -19,23 +19,34 @@
     </script>
 </head>
 <body>
- <nav>
-    <div class="container">
-        <a href="/" class="logo">VibeSentry</a>
-        <div class="nav-links">
-            <a href="{{ url_for('pricing') }}">Pricing</a>
-            <a href="{{ url_for('contact') }}">Contact</a>
-            <a href="{{ url_for('logout') }}">Logout</a>
-            <div class="theme-toggle" onclick="toggleTheme()"></div>
+    <nav>
+        <div class="container">
+            <a href="/" class="logo">VibeSentry</a>
+            <div class="nav-links">
+                <a href="{{ url_for('pricing') }}">Pricing</a>
+                <a href="{{ url_for('contact') }}">Contact</a>
+                {% if session.get('api_key') %}
+                    <a href="{{ url_for('dashboard') }}">Dashboard</a>
+                    <a href="{{ url_for('analytics') }}">Analytics</a>
+                    <a href="{{ url_for('logout') }}">Logout</a>
+                {% else %}
+                    <a href="{{ url_for('login') }}">Login</a>
+                    <a href="{{ url_for('signup') }}">Sign Up</a>
+                {% endif %}
+                <div class="theme-toggle" onclick="toggleTheme()"></div>
+            </div>
         </div>
-    </div>
-</nav>
+    </nav>
 
     <section class="hero">
         <div class="container">
             <h1>Revolutionize Your Content Moderation</h1>
             <p>Harness the power of AI to analyze sentiments in English, Pidgin, Yoruba, and beyond. Secure, scalable, and seamless integration for your platform's safety.</p>
-            <a href="{{ url_for('create_trial') }}" class="cta-button">Start Free Trial</a>
+            {% if session.get('api_key') %}
+                <a href="{{ url_for('dashboard') }}" class="cta-button">Go to Dashboard</a>
+            {% else %}
+                <a href="{{ url_for('signup') }}" class="cta-button">Get Started</a>
+            {% endif %}
         </div>
     </section>
 
@@ -102,6 +113,23 @@
             </div>
         </div>
     </section>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="container">
+                <div class="flash-messages">
+                    {% for category, message in messages %}
+                        <div class="flash-message {{ category }} fade-in-result">
+                            <span class="flash-icon">
+                                {% if category == 'error' %}⚠️{% else %}✅{% endif %}
+                            </span>
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+    {% endwith %}
 
     <footer>
         <div class="container">

@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pricing - VibeSentry</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="../static/css/style.css" rel="stylesheet">
     <script>
         function toggleTheme() {
@@ -18,62 +18,130 @@
         };
     </script>
 </head>
-<body>
- <nav>
-    <div class="container">
-        <a href="/" class="logo">VibeSentry</a>
-        <div class="nav-links">
-            <a href="{{ url_for('pricing') }}">Pricing</a>
-            <a href="{{ url_for('contact') }}">Contact</a>
-            <a href="{{ url_for('login') }}">Login</a>
-            <div class="theme-toggle" onclick="toggleTheme()"></div>
+<body class="pricing-page">
+    <nav>
+        <div class="container">
+            <a href="/" class="logo">VibeSentry</a>
+            <div class="nav-links">
+                <a href="{{ url_for('pricing') }}">Pricing</a>
+                <a href="{{ url_for('contact') }}">Contact</a>
+                {% if session.get('api_key') %}
+                    <a href="{{ url_for('dashboard') }}">Dashboard</a>
+                    <a href="{{ url_for('analytics') }}">Analytics</a>
+                    <a href="{{ url_for('logout') }}">Logout</a>
+                {% else %}
+                    <a href="{{ url_for('login') }}">Login</a>
+                    <a href="{{ url_for('signup') }}">Sign Up</a>
+                {% endif %}
+                <div class="theme-toggle" onclick="toggleTheme()"></div>
+            </div>
         </div>
-    </div>
-</nav>
+    </nav>
 
-    <div class="container">
-        <h1>Pricing Plans</h1>
-        <div class="pricing-grid">
-            <div class="pricing-card">
-                <h3>Trial</h3>
-                <div class="price">Free</div>
-                <ul>
-                    <li>1,000 requests</li>
-                    <li>14-day expiry</li>
-                    <li>Basic support</li>
-                </ul>
-                <a href="{{ url_for('create_trial') }}" class="cta-button">Start Trial</a>
+    <main class="pricing-container">
+        <div class="container">
+            <div class="pricing-header">
+                <h1>Pricing Plans</h1>
+                <p>Choose the perfect plan for your content moderation needs</p>
             </div>
-            <div class="pricing-card">
-                <h3>Basic</h3>
-                <div class="price">$10/month</div>
-                <ul>
-                    <li>10,000 requests/month</li>
-                    <li>Monthly renewal</li>
-                    <li>Email support</li>
-                </ul>
-                <form method="POST" action="/subscribe">
-                    <input type="hidden" name="plan" value="basic">
-                    <input type="email" name="email" class="input-field" placeholder="Your Email" required>
-                    <button type="submit" class="cta-button mt-4">Subscribe</button>
-                </form>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div class="flash-messages">
+                        {% for category, message in messages %}
+                            <div class="flash-message {{ category }} fade-in-result">
+                                <span class="flash-icon">
+                                    {% if category == 'error' %}⚠️{% else %}✅{% endif %}
+                                </span>
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+
+            <div class="pricing-grid">
+                <div class="pricing-card trial-card">
+                    <div class="card-header">
+                        <h3>Trial</h3>
+                        <div class="price">Free</div>
+                        <p class="price-description">Perfect for testing</p>
+                    </div>
+                    <ul class="features-list">
+                        <li>1,000 requests</li>
+                        <li>14-day expiry</li>
+                        <li>Basic support</li>
+                        <li>All languages supported</li>
+                    </ul>
+                    <a href="{{ url_for('create_trial') }}" class="cta-button">Start Trial</a>
+                </div>
+
+                <div class="pricing-card basic-card featured">
+                    <div class="featured-badge">Most Popular</div>
+                    <div class="card-header">
+                        <h3>Basic</h3>
+                        <div class="price">$10<span class="price-period">/month</span></div>
+                        <p class="price-description">Great for small businesses</p>
+                    </div>
+                    <ul class="features-list">
+                        <li>10,000 requests/month</li>
+                        <li>Monthly renewal</li>
+                        <li>Email support</li>
+                        <li>Analytics dashboard</li>
+                        <li>API documentation</li>
+                    </ul>
+                    <form method="POST" action="/subscribe" class="subscription-form">
+                        <input type="hidden" name="plan" value="basic">
+                        {% if session.get('signup_user') %}
+                            <input type="hidden" name="email" value="{{ session.signup_user.email }}">
+                            <p class="text-center" style="color: var(--text-secondary); font-size: 14px; margin-bottom: 16px;">
+                                Subscribing as: {{ session.signup_user.email }}
+                            </p>
+                        {% else %}
+                            <input type="email" name="email" class="input-field" placeholder="Your Email" required>
+                        {% endif %}
+                        <button type="submit" class="cta-button">Subscribe</button>
+                    </form>
+                </div>
+
+                <div class="pricing-card pro-card">
+                    <div class="card-header">
+                        <h3>Pro</h3>
+                        <div class="price">$50<span class="price-period">/month</span></div>
+                        <p class="price-description">For enterprise solutions</p>
+                    </div>
+                    <ul class="features-list">
+                        <li>Unlimited requests</li>
+                        <li>Priority support</li>
+                        <li>Custom integrations</li>
+                        <li>Advanced analytics</li>
+                        <li>Dedicated account manager</li>
+                    </ul>
+                    <form method="POST" action="/subscribe" class="subscription-form">
+                        <input type="hidden" name="plan" value="pro">
+                        {% if session.get('signup_user') %}
+                            <input type="hidden" name="email" value="{{ session.signup_user.email }}">
+                            <p class="text-center" style="color: var(--text-secondary); font-size: 14px; margin-bottom: 16px;">
+                                Subscribing as: {{ session.signup_user.email }}
+                            </p>
+                        {% else %}
+                            <input type="email" name="email" class="input-field" placeholder="Your Email" required>
+                        {% endif %}
+                        <button type="submit" class="cta-button">Subscribe</button>
+                    </form>
+                </div>
             </div>
-            <div class="pricing-card">
-                <h3>Pro</h3>
-                <div class="price">$50/month</div>
-                <ul>
-                    <li>Unlimited requests</li>
-                    <li>Priority support</li>
-                    <li>Custom integrations</li>
-                </ul>
-                <form method="POST" action="/subscribe">
-                    <input type="hidden" name="plan" value="pro">
-                    <input type="email" name="email" class="input-field" placeholder="Your Email" required>
-                    <button type="submit" class="cta-button mt-4">Subscribe</button>
-                </form>
-            </div>
+            
+            {% if not session.get('signup_user') and not session.get('api_key') %}
+                <div class="text-center" style="margin-top: 40px;">
+                    <p style="color: var(--text-secondary);">
+                        New to VibeSentry? <a href="{{ url_for('signup') }}">Create an account</a> for a seamless experience.
+                    </p>
+                </div>
+            {% endif %}
         </div>
-    </div>
+    </main>
+
     <footer>
         <div class="container">
             <p>&copy; 2025 VibeSentry. All rights reserved.</p>

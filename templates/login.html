@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - VibeSentry</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="../static/css/style.css" rel="stylesheet">
     <script>
         function toggleTheme() {
@@ -18,35 +18,55 @@
         };
     </script>
 </head>
-<body>
+<body class="login-page">
     <nav>
-    <div class="container">
-        <a href="/" class="logo">VibeSentry</a>
-        <div class="nav-links">
-            <a href="{{ url_for('pricing') }}">Pricing</a>
-            <a href="{{ url_for('contact') }}">Contact</a>
-            <a href="{{ url_for('login') }}">Login</a>
-            <div class="theme-toggle" onclick="toggleTheme()"></div>
+        <div class="container">
+            <a href="/" class="logo">VibeSentry</a>
+            <div class="nav-links">
+                <a href="{{ url_for('pricing') }}">Pricing</a>
+                <a href="{{ url_for('contact') }}">Contact</a>
+                <a href="{{ url_for('login') }}">Login</a>
+                <a href="{{ url_for('signup') }}">Sign Up</a>
+                <div class="theme-toggle" onclick="toggleTheme()"></div>
+            </div>
         </div>
-    </div>
-</nav>
+    </nav>
 
-    <div class="container flex items-center justify-center min-h-screen px-4">
-        <div class="card w-full max-w-lg">
-            <h1 class="text-center">Login to Dashboard</h1>
-            <form method="POST" action="/login">
-                <div>
-                    <label for="api_key">API Key:</label>
-                    <input type="text" id="api_key" name="api_key" class="input-field" placeholder="Enter your API key...">
+    <div class="main-container">
+        <h1>Login to Dashboard</h1>
+        <p>Access your VibeSentry dashboard with your email and API key.</p>
+        
+        <form method="POST" action="/login" class="login-form">
+            <label for="email">Email Address</label>
+            <input type="email" id="email" name="email" class="input-field" placeholder="Enter your email address" required>
+            
+            <label for="api_key">API Key</label>
+            <input type="text" id="api_key" name="api_key" class="input-field" placeholder="Enter your API key" required>
+            
+            <button type="submit">Login</button>
+        </form>
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for category, message in messages %}
+                        <div class="flash-message {{ category }} fade-in-result">
+                            <span class="flash-icon">
+                                {% if category == 'error' %}⚠️{% else %}✅{% endif %}
+                            </span>
+                            {{ message }}
+                        </div>
+                    {% endfor %}
                 </div>
-                <button type="submit" class="mt-6">Login</button>
-            </form>
-            {% if error %}
-                <p class="error text-center">{{ error }}</p>
             {% endif %}
-            <p class="text-center mt-4">Don't have an API key? <a href="{{ url_for('create_trial') }}">Start a Free Trial</a></p>
-        </div>
+        {% endwith %}
+        
+        <p class="text-center mt-4">
+            Don't have an account? <a href="{{ url_for('signup') }}">Sign up here</a><br>
+            Need a free trial? <a href="{{ url_for('create_trial') }}">Start Free Trial</a>
+        </p>
     </div>
+    
     <footer>
         <div class="container">
             <p>&copy; 2025 VibeSentry. All rights reserved.</p>
