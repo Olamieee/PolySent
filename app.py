@@ -53,12 +53,12 @@ class Config:
 
 class DevelopmentConfig(Config):
     DEBUG = True
-    DATABASE = os.getenv("DATABASE", "subscriptions.db")
+    DATABASE = os.getenv("DATABASE", "payment_subscriptions.db")
     LOG_FILE = "vibesentry_dev.log"
 
 class ProductionConfig(Config):
     DEBUG = False
-    DATABASE = os.getenv("DATABASE", "/path/to/production/subscriptions.db")
+    DATABASE = os.getenv("DATABASE", "/path/to/production/payment_subscriptions.db")
     LOG_FILE = "/var/log/vibesentry.log"
 
 # Select config based on environment
@@ -314,8 +314,9 @@ def signup():
         email = request.form.get("email")
         country = request.form.get("country")
         
-        if not all([first_name, last_name, email, country]):
-            flash("All fields are required", "error")
+        # Validate all fields are non-empty
+        if not all([first_name.strip(), last_name.strip(), email.strip(), country.strip()]):
+            flash("All fields are required and cannot be empty", "error")
             return render_template("signup.html", session=session)
         
         try:
@@ -330,15 +331,15 @@ def signup():
             cursor.execute("""
                 INSERT INTO users (first_name, last_name, email, country, created_at) 
                 VALUES (?, ?, ?, ?, ?)
-            """, (first_name, last_name, email, country, datetime.now().isoformat()))
+            """, (first_name.strip(), last_name.strip(), email.strip(), country.strip(), datetime.now().isoformat()))
             conn.commit()
             
             # Store user info in session for pricing page
             session["signup_user"] = {
-                "first_name": first_name,
-                "last_name": last_name,
-                "email": email,
-                "country": country
+                "first_name": first_name.strip(),
+                "last_name": last_name.strip(),
+                "email": email.strip(),
+                "country": country.strip()
             }
             
             flash("Account created successfully! Please choose a plan to continue.", "success")
@@ -535,29 +536,34 @@ def subscribe():
     
     user_id, first_name, last_name = user_result
     
+    # Validate first_name and last_name
+    if not first_name or not last_name:
+        logger.error(f"Missing first_name or last_name for email {email}")
+        flash("User profile incomplete. Please update your profile.", "error")
+        return redirect(url_for("signup"))
+    
     ngn_rate = get_ngn_rate()
     amount = int(usd_prices[plan] * ngn_rate)
     
     payload = {
         "amount": amount,
-        "email": email,
         "currency": "NGN",
+        "email": email,
+        "firstname": first_name,
+        "lastname": last_name,
         "redirect_url": app.config['CALLBACK_URL'],
-        "customer": {
-            "email": email,
-            "firstname": first_name,
-            "lastname": last_name
-        },
-        "meta": {
-            "plan": plan,
-            "user_id": user_id,
-            "first_name": first_name,
-            "last_name": last_name
-        },
+        "meta": [
+            {"metaname": "plan", "metavalue": plan},
+            {"metaname": "user_id", "metavalue": str(user_id)},
+            {"metaname": "first_name", "metavalue": first_name},
+            {"metaname": "last_name", "metavalue": last_name}
+        ],
         "txref": "vibesentry_" + str(datetime.now().timestamp())
     }
-    
+
+
     try:
+        logger.info(f"Payment payload: {payload}")
         res = rave.Account.charge(payload)
         if res.get("authUrl"):
             return redirect(res["authUrl"])
@@ -565,6 +571,7 @@ def subscribe():
             flash("Validation required", "error")
             return redirect(url_for("pricing"))
     except RaveExceptions.TransactionChargeError as e:
+        logger.error(f"TransactionChargeError: {str(e)}")
         flash(str(e.err), "error")
         return redirect(url_for("pricing"))
     flash("Payment initiation failed", "error")
